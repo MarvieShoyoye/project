@@ -2,47 +2,29 @@ const express = require("express");
 const UserModel = require("../models/usermodel");
 const NewsModel = require("../models/newsmodel");
 const StarModel = require("../models/starmodel");
-
+const isAuth = require("../middleware/auth")
 
 const router = express.Router();
 
+const {
+    createStarredNews,
+    getNewsArticle,
+    updateStarredNews,
+    deleteAllStarredNews
+} = require("../controllers/starcontroller")
+
 // CREATE STARRED NEWS 
-router.post("/starnews", async (req, res) => {
-    const { email, newsId } = req.body;
-    try {
-        // Validate input fields
-        if (!email && !newsId)
-            return res.status(400).json({
-                error: "PLEASE PROVIDE BOTH EMAIL AND NEWS ID"
-            });
-
-        // Create starred news
-        await StarModel.create({
-            email,
-            newsId,
-        });
-
-        return res.status(201).json({
-            message: "NEWS ARTICLE STARRED SUCCESSFULLY"
-        });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: "INTERNAL SERVER ERROR" });
-    }
-});
+router.post("/starnews", createStarredNews);
 
 
 //GET NEWS ARTICLE
-router.get("/profile",  async (req, res) => {
-    try {
-        const userId = req.user.id;
+router.get("/starred", getNewsArticle);
 
-        const user = await StarModel.findById(userId);
-        return res.status(200).json(user);
-    } catch (error) {
-        console.log(error);
-        return res.sendStatus(500);
-    }
-});
+//UPDATE STARRED NEWS 
+router.put("/update/:email", updateStarredNews);
+
+
+//DELETE ALL STARRED NEWS 
+router.delete("/delete", deleteAllStarredNews);
 
 module.exports = router;
